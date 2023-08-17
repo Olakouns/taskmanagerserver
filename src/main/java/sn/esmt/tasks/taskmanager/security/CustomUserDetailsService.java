@@ -14,27 +14,27 @@ import java.util.UUID;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-	@Autowired
-	UserRepository userRepository;
-	
-	@Override
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		// TODO Auto-generated method stub
-		
-		User user = userRepository.findByUsername(username)
+    @Autowired
+    UserRepository userRepository;
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        // TODO Auto-generated method stub
+
+        User user = userRepository.findByEmailOrUsername(username, username)
                 .orElseThrow(() ->
                         new UsernameNotFoundException("User not found with username or email : " + username)
+                );
+        return UserPrincipal.create(user);
+    }
+
+    public UserDetails loadUserById(String id) throws ResourceNotFoundException {
+        // TODO Auto-generated method stub
+
+        User user = userRepository.findById(UUID.fromString(id)).orElseThrow(
+                () -> new ResourceNotFoundException("User", "id", id)
         );
-		return UserPrincipal.create(user);
-	}
-	
-	public UserDetails loadUserById(String id) throws ResourceNotFoundException {
-		// TODO Auto-generated method stub
-		
-		User user = userRepository.findById(UUID.fromString(id)).orElseThrow(
-	            () -> new ResourceNotFoundException("User", "id", id)
-	        );
-		return UserPrincipal.create(user);
-	}
+        return UserPrincipal.create(user);
+    }
 
 }

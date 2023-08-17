@@ -32,7 +32,6 @@ public abstract class BaseEntity implements Serializable {
 
     @CreationTimestamp
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-//	@JsonIgnore
     private Instant createdAt;
 
     @UpdateTimestamp

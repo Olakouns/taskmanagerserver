@@ -16,195 +16,186 @@ import java.util.UUID;
 @Entity
 @Table(name = "profiles")
 @SQLDelete(sql =
-    "UPDATE profiles " +
-    "SET deleted = true " +
-    "WHERE id = ?")
+        "UPDATE profiles " +
+                "SET deleted = true " +
+                "WHERE id = ?")
 @Where(clause = "deleted = false")
-@Inheritance(strategy= InheritanceType.SINGLE_TABLE)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(
-	    name="discriminator",
-	    discriminatorType= DiscriminatorType.STRING
-	    )
+        name = "discriminator",
+        discriminatorType = DiscriminatorType.STRING
+)
 //@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class Profile extends BaseEntity {
 
-	@Id
-	@GeneratedValue(generator = "uuid2")
+    @Id
+    @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
-	@Type(type="uuid-char")
-	private UUID id;
-	@OneToOne(fetch = FetchType.EAGER)
-	@JoinColumn
-	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-	private User user;
-	private String username;
-	private String firstName;
-	private String lastName;
-	private String email;
-	private String phone;
-	private String gender;
-	private String country;
-	private Date birthday;
+    @Type(type = "uuid-char")
+    private UUID id;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private User user;
+    private String username;
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String phone;
+    private String gender;
+    private String country;
+    private Date birthday;
 
-	@ManyToOne
-	@JoinColumn
-	private MediaFile photo;
-	
-	@CreationTimestamp
-	@JsonFormat(shape = JsonFormat.Shape.STRING)
+    @ManyToOne
+    @JoinColumn
+    private MediaFile photo;
+
+    @CreationTimestamp
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant createdAt;
 
     @UpdateTimestamp
-	@JsonFormat(shape = JsonFormat.Shape.STRING)
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant updatedAt;
-	@Transient
-	private String cityHall;
-    
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Profile other = (Profile) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		return true;
-	}
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
-	}
 
-	public UUID getId() {
-		return id;
-	}
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Profile other = (Profile) obj;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        return true;
+    }
 
-	public void setId(UUID id) {
-		this.id = id;
-	}
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        return result;
+    }
 
-	public User getUser() {
-		return user;
-	}
+    public UUID getId() {
+        return id;
+    }
 
-	public void setUser(User user) {
-		this.user = user;
-	}
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
-	public String getUsername() {
-		return username;
-	}
+    public User getUser() {
+        return user;
+    }
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
+    public void setUser(User user) {
+        this.user = user;
+    }
 
-	public String getFirstName() {
-		return firstName;
-	}
+    public String getUsername() {
+        return username;
+    }
 
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-	public String getLastName() {
-		return lastName;
-	}
+    public String getFirstName() {
+        return firstName;
+    }
 
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
 
-	public String getEmail() {
-		return email;
-	}
+    public String getLastName() {
+        return lastName;
+    }
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
 
-	public String getPhone() {
-		return phone;
-	}
+    public String getEmail() {
+        return email;
+    }
 
-	public void setPhone(String phone) {
-		this.phone = phone;
-	}
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-	public String getGender() {
-		return gender;
-	}
+    public String getPhone() {
+        return phone;
+    }
 
-	public void setGender(String gender) {
-		this.gender = gender;
-	}
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
 
-	public String getCountry() {
-		return country;
-	}
+    public String getGender() {
+        return gender;
+    }
 
-	public void setCountry(String country) {
-		this.country = country;
-	}
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
 
-	public Date getBirthday() {
-		return birthday;
-	}
+    public String getCountry() {
+        return country;
+    }
 
-	public void setBirthday(Date birthday) {
-		this.birthday = birthday;
-	}
+    public void setCountry(String country) {
+        this.country = country;
+    }
 
-	public MediaFile getPhoto() {
-		return photo;
-	}
+    public Date getBirthday() {
+        return birthday;
+    }
 
-	public void setPhoto(MediaFile photo) {
-		this.photo = photo;
-	}
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
+    }
 
-	@Override
-	public Instant getCreatedAt() {
-		return createdAt;
-	}
+    public MediaFile getPhoto() {
+        return photo;
+    }
 
-	@Override
-	public void setCreatedAt(Instant createdAt) {
-		this.createdAt = createdAt;
-	}
+    public void setPhoto(MediaFile photo) {
+        this.photo = photo;
+    }
 
-	@Override
-	public Instant getUpdatedAt() {
-		return updatedAt;
-	}
+    @Override
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
 
-	@Override
-	public void setUpdatedAt(Instant updatedAt) {
-		this.updatedAt = updatedAt;
-	}
+    @Override
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
 
-	public String getCityHall() {
-		return cityHall;
-	}
+    @Override
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
 
-	public void setCityHall(String cityHall) {
-		this.cityHall = cityHall;
-	}
+    @Override
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }
