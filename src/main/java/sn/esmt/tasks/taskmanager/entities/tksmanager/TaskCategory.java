@@ -1,5 +1,6 @@
 package sn.esmt.tasks.taskmanager.entities.tksmanager;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -32,6 +33,7 @@ public class TaskCategory extends BaseEntity {
     private String indexColor;
 
     @ColumnDefault("false")
+    @JsonIgnore
     private boolean defaultTaskCategory;
 
     @ManyToOne

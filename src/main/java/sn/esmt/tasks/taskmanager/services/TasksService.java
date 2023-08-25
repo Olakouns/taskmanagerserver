@@ -3,6 +3,7 @@ package sn.esmt.tasks.taskmanager.services;
 import sn.esmt.tasks.taskmanager.dto.converters.ApiResponse;
 import sn.esmt.tasks.taskmanager.entities.tksmanager.Dashboard;
 import sn.esmt.tasks.taskmanager.entities.tksmanager.TaskCategory;
+import sn.esmt.tasks.taskmanager.entities.tksmanager.TaskComment;
 import sn.esmt.tasks.taskmanager.entities.tksmanager.Tasks;
 
 import java.util.List;
@@ -12,6 +13,7 @@ public interface TasksService {
     List<Dashboard> getAllDashboards();
 
     Dashboard addDashboard(Dashboard dashboard);
+    Dashboard getDashboard(UUID dashboardId);
 
     Dashboard updateDashboard(UUID dashboardId, Dashboard dashboard);
 
@@ -40,4 +42,9 @@ public interface TasksService {
     ApiResponse attachFileToTheTask(UUID taskId, long mediaFileId);
 
     ApiResponse removeFileFromTask(UUID taskId, long mediaFileId);
+
+
+    TaskComment addCommentToTheTasks(UUID taskId, TaskComment taskComment);
+
+    ApiResponse removeCommentFromTask(UUID taskId, long taskCommentId);
 }

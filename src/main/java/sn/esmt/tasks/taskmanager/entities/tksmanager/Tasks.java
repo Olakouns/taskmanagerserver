@@ -31,6 +31,8 @@ public class Tasks extends BaseEntity {
     @NotNull
     private String title;
 
+    private String description;
+
     @ManyToOne
     private MediaFile imageDescription;
 
@@ -57,6 +59,10 @@ public class Tasks extends BaseEntity {
 
     @OneToMany(cascade = CascadeType.REMOVE)
     private List<MediaFile> mediaFiles;
+
+
+    @OneToMany(cascade = CascadeType.REMOVE)
+    private List<TaskComment> taskComments;
 
     public UUID getId() {
         return id;
@@ -136,5 +142,21 @@ public class Tasks extends BaseEntity {
 
     public void setMediaFiles(List<MediaFile> mediaFiles) {
         this.mediaFiles = mediaFiles;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public List<TaskComment> getTaskComments() {
+        return taskComments;
+    }
+
+    public void setTaskComments(List<TaskComment> taskComments) {
+        this.taskComments = taskComments;
     }
 }

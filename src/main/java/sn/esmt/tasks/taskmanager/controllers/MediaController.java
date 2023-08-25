@@ -1,13 +1,18 @@
 package sn.esmt.tasks.taskmanager.controllers;
 
 
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import sn.esmt.tasks.taskmanager.entities.MediaFile;
+import sn.esmt.tasks.taskmanager.exceptions.ResourceNotFoundException;
+import sn.esmt.tasks.taskmanager.exceptions.StorageFileNotFoundException;
 import sn.esmt.tasks.taskmanager.repositories.MediaFileRepository;
 import sn.esmt.tasks.taskmanager.repositories.UserRepository;
 import sn.esmt.tasks.taskmanager.security.CurrentUser;
@@ -16,6 +21,7 @@ import sn.esmt.tasks.taskmanager.storages.StorageService;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 
@@ -81,6 +87,32 @@ public class MediaController {
         }
         mediaFile.setPostedBy(userRepository.getReferenceById(principal.getId()));
         return mediaFileRepository.save(mediaFile);
+    }
+
+    @RequestMapping(value = "{type}/{filename:.+}", method = RequestMethod.GET)
+    public @ResponseBody
+    ResponseEntity<Resource> getImageFile(@PathVariable("type") String type, @PathVariable("filename") String filename) {
+        Resource image;
+        try {
+            image = storageService.loadAsResource(type + "/" + filename);
+            HttpHeaders header = new HttpHeaders();
+            Optional<MediaFile> mediaFile = mediaFileRepository.findByPath(type + "/" + filename);
+            MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM;
+            if (mediaFile.isPresent()) {
+                header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + mediaFile.get().getOriginalName());
+                if (mediaFile.get().getOriginalName().endsWith(".pdf")) {
+                    mediaType = MediaType.APPLICATION_PDF;
+                }
+            }
+            return ResponseEntity.ok()
+                    .headers(header)
+                    .contentLength(image.contentLength())
+                    .contentType(mediaType)
+                    .body(image);
+        } catch (StorageFileNotFoundException | IOException ex) {
+            throw new ResourceNotFoundException("file", filename, "resource");
+        }
+
     }
 
 }

@@ -7,6 +7,7 @@ import sn.esmt.tasks.taskmanager.entities.MediaFile;
 import sn.esmt.tasks.taskmanager.entities.Profile;
 import sn.esmt.tasks.taskmanager.entities.tksmanager.Dashboard;
 import sn.esmt.tasks.taskmanager.entities.tksmanager.TaskCategory;
+import sn.esmt.tasks.taskmanager.entities.tksmanager.TaskComment;
 import sn.esmt.tasks.taskmanager.entities.tksmanager.Tasks;
 import sn.esmt.tasks.taskmanager.exceptions.RequestNotAcceptableException;
 import sn.esmt.tasks.taskmanager.exceptions.ResourceNotFoundException;
@@ -14,6 +15,7 @@ import sn.esmt.tasks.taskmanager.repositories.MediaFileRepository;
 import sn.esmt.tasks.taskmanager.repositories.ProfileRepository;
 import sn.esmt.tasks.taskmanager.repositories.tksmanager.DashboardRepository;
 import sn.esmt.tasks.taskmanager.repositories.tksmanager.TaskCategoryRepository;
+import sn.esmt.tasks.taskmanager.repositories.tksmanager.TaskCommentRepository;
 import sn.esmt.tasks.taskmanager.repositories.tksmanager.TasksRepository;
 
 import javax.persistence.EntityManager;
@@ -31,18 +33,20 @@ public class TasksServiceImpl implements TasksService {
     private final TasksRepository tasksRepository;
     private final ProfileRepository profileRepository;
     private final MediaFileRepository mediaFileRepository;
+    private final TaskCommentRepository taskCommentRepository;
     private final LoggerUser loggerUser;
 
     @PersistenceContext
     private EntityManager entityManager;
 
 
-    public TasksServiceImpl(DashboardRepository dashboardRepository, TaskCategoryRepository taskCategoryRepository, TasksRepository tasksRepository, ProfileRepository profileRepository, MediaFileRepository mediaFileRepository, LoggerUser loggerUser) {
+    public TasksServiceImpl(DashboardRepository dashboardRepository, TaskCategoryRepository taskCategoryRepository, TasksRepository tasksRepository, ProfileRepository profileRepository, MediaFileRepository mediaFileRepository, TaskCommentRepository taskCommentRepository, LoggerUser loggerUser) {
         this.dashboardRepository = dashboardRepository;
         this.taskCategoryRepository = taskCategoryRepository;
         this.tasksRepository = tasksRepository;
         this.profileRepository = profileRepository;
         this.mediaFileRepository = mediaFileRepository;
+        this.taskCommentRepository = taskCommentRepository;
         this.loggerUser = loggerUser;
     }
 
@@ -63,11 +67,17 @@ public class TasksServiceImpl implements TasksService {
         List<TaskCategory> taskCategories = taskCategoryRepository.findByDefaultTaskCategory(true);
         for (TaskCategory taskCategory : taskCategories) {
             entityManager.detach(taskCategory);
+            taskCategory.setId(null);
             taskCategory.setDefaultTaskCategory(false);
             taskCategory.setDashboard(dashboard);
             taskCategoryRepository.save(taskCategory);
         }
         return dashboard;
+    }
+
+    @Override
+    public Dashboard getDashboard(UUID dashboardId) {
+        return dashboardRepository.findById(dashboardId).orElseThrow(() -> new ResourceNotFoundException("Dashboard", "id", dashboardId));
     }
 
     @Override
@@ -81,6 +91,10 @@ public class TasksServiceImpl implements TasksService {
     @Override
     public ApiResponse deleteDashboard(UUID dashboardId) {
         Dashboard dashboardDb = dashboardRepository.findById(dashboardId).orElseThrow(() -> new ResourceNotFoundException("Dashboard", "id", dashboardId));
+        List<TaskCategory> taskCategories = getTaskCategoryByDashboard(dashboardId);
+        for (TaskCategory taskCategory : taskCategories) {
+            deleteTaskCategory(dashboardId, taskCategory.getId());
+        }
         dashboardRepository.delete(dashboardDb);
         return new ApiResponse(true, "Dashboard deleted successfully");
     }
@@ -136,6 +150,7 @@ public class TasksServiceImpl implements TasksService {
     public Tasks addTasks(UUID taskCategoryId, Tasks tasks) {
         TaskCategory taskCategoryDB = taskCategoryRepository.findById(taskCategoryId).orElseThrow(() -> new ResourceNotFoundException("TaskCategory", "id", taskCategoryId));
         tasks.setCreatedBy(loggerUser.getCurrentUser());
+        tasks.setTaskCategory(taskCategoryDB);
         tasks.setDashboard(taskCategoryDB.getDashboard());
         return tasksRepository.save(tasks);
     }
@@ -151,6 +166,7 @@ public class TasksServiceImpl implements TasksService {
 
         taskDb.setTitle(tasks.getTitle());
         taskDb.setImageDescription(tasks.getImageDescription());
+        taskDb.setDescription(tasks.getDescription());
         taskDb.setTags(tasks.getTags());
         taskDb.setBadgeColor(tasks.getBadgeColor());
         taskDb.setDeadline(tasks.getDeadline());
@@ -219,5 +235,31 @@ public class TasksServiceImpl implements TasksService {
         tasks.getMediaFiles().removeIf(mediaFile1 -> mediaFile1.getId() == mediaFileId);
         tasksRepository.save(tasks);
         return new ApiResponse(true, mediaFile.getOriginalName() + " is successfully remove");
+    }
+
+    @Override
+    public TaskComment addCommentToTheTasks(UUID taskId, TaskComment taskComment) {
+        Tasks tasks = tasksRepository.findById(taskId).orElseThrow(() -> new ResourceNotFoundException("Tasks", "id", taskId));
+
+        if (tasks.getTaskComments() == null) {
+            tasks.setTaskComments(new ArrayList<>());
+        }
+
+        taskComment.setProfile(loggerUser.getCurrentProfile());
+        taskComment.setTasks(tasks);
+        taskComment = taskCommentRepository.save(taskComment);
+        tasks.getTaskComments().add(taskComment);
+        tasksRepository.save(tasks);
+        return taskComment;
+    }
+
+    @Override
+    public ApiResponse removeCommentFromTask(UUID taskId, long taskCommentId) {
+        Tasks tasks = tasksRepository.findById(taskId).orElseThrow(() -> new ResourceNotFoundException("Tasks", "id", taskId));
+        TaskComment taskComment = taskCommentRepository.findById(taskCommentId).orElseThrow(() -> new ResourceNotFoundException("TaskComment", "id", taskCommentId));
+
+        tasks.getTaskComments().removeIf(taskComment1 -> taskComment1.getId() == taskCommentId);
+        tasksRepository.save(tasks);
+        return new ApiResponse(true, "Comment is successfully remove");
     }
 }
