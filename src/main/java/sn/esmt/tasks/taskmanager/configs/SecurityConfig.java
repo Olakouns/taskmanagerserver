@@ -1,11 +1,8 @@
 package sn.esmt.tasks.taskmanager.configs;
 
 
-import org.modelmapper.AbstractCondition;
-import org.modelmapper.Condition;
 import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.spi.MappingContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,12 +25,9 @@ import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-import sn.esmt.tasks.taskmanager.security.BasicAuthenticationFilter;
 import sn.esmt.tasks.taskmanager.security.CustomUserDetailsService;
 import sn.esmt.tasks.taskmanager.security.JwtAuthenticationEntryPoint;
 import sn.esmt.tasks.taskmanager.security.JwtAuthenticationFilter;
-
-import java.util.Map;
 
 
 @Configuration
@@ -75,12 +69,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.addAllowedOrigin("http://192.168.1.137:4200");
-        config.addAllowedOrigin("http://127.0.0.1:4500");
+        config.addAllowedOrigin("http://127.0.0.1:4200");
         config.addAllowedOrigin("http://localhost:4200");
-        config.addAllowedOrigin("https://console.eges.com");
-        Map<String, Integer> map;
-//        config.addAllowedOrigin("*");
         config.addAllowedHeader("*");
         config.addAllowedMethod("OPTIONS");
         config.addAllowedMethod("GET");
@@ -130,8 +120,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-//        web.ignoring().mvcMatchers(HttpMethod.OPTIONS, "/**");
-//        web.ignoring().antMatchers("/v2/api-docs", "/configuration/**", "/swagger-resources/**",  "/swagger-ui.html", "/webjars/**", "/api-docs/**");
         web.httpFirewall(allowUrlEncodedSlashHttpFirewall());
     }
 
@@ -160,26 +148,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/**/*.css",
                         "/**/*.js")
                 .permitAll()
-                .antMatchers("/api/auth/login", "/api/auth/signup", "/api/auth/changeddefaultpassword", "/api/auth/first-password",
-                        "/api/auth/checkedtoken", "/api/auth/newpassword", "/api/auth/passwordforgot", "/api/auth/refresh-token",
-                        "/api/auth/phone-number/register", "/api/auth/phone-number/verification", "/api/fcm/test")
+                .antMatchers("/api/auth/login", "/api/auth/register", "/api/register/confirm-account")
                 .permitAll()
-                .antMatchers("/api/usage/**", "/api/resources/**", "/api/payments/feda/**")
-                .permitAll()
-//                .antMatchers("/medias/**")
-//                .permitAll()
                 .antMatchers(HttpMethod.POST, "/api/medias")
                 .permitAll()
-                .antMatchers("/v2/api-docs", "/configuration/**", "/swagger-resources/**", "/swagger-ui/**","/swagger-ui.html", "/webjars/**", "/api-docs/**")
+                .antMatchers("/v2/api-docs", "/swagger-resources/**", "/swagger-ui/**")
                 .permitAll()
                 .antMatchers("/websocket")
                 .permitAll()
                 .anyRequest()
                 .authenticated();
-
-        // Add our custom JWT security filter
-//        http.addFilterBefore(new BasicAuthenticationFilter(authenticationManager()), UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-
     }
 }

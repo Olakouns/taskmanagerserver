@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Confirmation de compte</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link href='https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700,800,900&display=swap'
+          rel='stylesheet' type='text/css'/>
+
+    <!-- use the font -->
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 48px;
+        }
+
+        .space {
+            padding: 16px;
+        }
+
+        .center-item {
+            display: flex;
+        }
+
+        .m-b-2 {
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            padding: 0px 16px;
+            background-color: #2eab82;
+            border-radius: 30px;
+            text-align: center;
+            height: 36px;
+            line-height: 36px;
+            color: #fafafa;
+            text-decoration: none;
+            margin: auto;
+        }
+
+        .footer {
+            background-color: #647577;
+            padding: 8px 16px;
+            color: #fafafa;
+        }
+    </style>
+</head>
+<body>
+
+<div style="max-width: 900px; margin: 0 auto ; background-color: #fafafa;">
+    <div style="background-color: #2eab82; padding: 16px;">
+    </div>
+    <div class="space">
+        <p>Bonjour, <span th:text="${name}"></span></p>
+        <p>Cliquez sur le bouton en bas pour accepter confirmer votre compte.</p>
+
+        <div class="m-b-2 center-item"><a class="btn"
+                                          th:href="${@environment.getProperty('front.url') + 'auth/register/confirmation?token=' + token}">Confimer
+            votre inscription</a></div>
+        <p>Merci pour votre confiance.</p>
+    </div>
+    <div class="footer">
+        <p>Task Manager</p>
+    </div>
+</div>
+
+</body>
+</html>

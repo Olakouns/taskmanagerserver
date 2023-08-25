@@ -9,10 +9,12 @@ import sn.esmt.tasks.taskmanager.entities.User;
 import sn.esmt.tasks.taskmanager.entities.enums.StatusUser;
 import sn.esmt.tasks.taskmanager.entities.enums.TypePrivilege;
 import sn.esmt.tasks.taskmanager.entities.enums.TypeRole;
+import sn.esmt.tasks.taskmanager.entities.tksmanager.TaskCategory;
 import sn.esmt.tasks.taskmanager.repositories.PrivilegeRepository;
 import sn.esmt.tasks.taskmanager.repositories.ProfileRepository;
 import sn.esmt.tasks.taskmanager.repositories.RoleRepository;
 import sn.esmt.tasks.taskmanager.repositories.UserRepository;
+import sn.esmt.tasks.taskmanager.repositories.tksmanager.TaskCategoryRepository;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -26,34 +28,48 @@ public class DataLoadConfig {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final ProfileRepository profileRepository;
+    private final TaskCategoryRepository taskCategoryRepository;
 
     public DataLoadConfig(RoleRepository roleRepository, PrivilegeRepository privilegeRepository, PasswordEncoder passwordEncoder,
-                          UserRepository userRepository, ProfileRepository profileRepository) {
+                          UserRepository userRepository, ProfileRepository profileRepository, TaskCategoryRepository taskCategoryRepository) {
         this.roleRepository = roleRepository;
         this.privilegeRepository = privilegeRepository;
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.profileRepository = profileRepository;
+        this.taskCategoryRepository = taskCategoryRepository;
     }
 
     @PostConstruct
     public void loadData() {
         loadRole();
+        loadDefaultTaskCategories();
     }
 
     public void loadRole() {
-        if (roleRepository.existsByType(TypeRole.AUTHENTICATION))
+        if (roleRepository.existsByType(TypeRole.SUPER_ADMIN))
             return;
 
         List<Privilege> privilegeAdmin = new ArrayList<>();
         for (int i = 1; i < TypePrivilege.values().length; i++) {
             String description = TypePrivilege.values()[i].toString().replace("_", " ");
             String category = description.split(" ")[description.split(" ").length - 1];
-            privilegeAdmin.add(privilegeRepository.save(new Privilege(category, TypePrivilege.values()[i], description, TypeRole.AUTHENTICATION)));
+            privilegeAdmin.add(privilegeRepository.save(new Privilege(category, TypePrivilege.values()[i], description, TypeRole.SUPER_ADMIN)));
         }
 
+        List<Privilege> privilegeUser = new ArrayList<>();
+        for (int i = 11; i < TypePrivilege.values().length; i++) {
+            String description = TypePrivilege.values()[i].toString().replace("_", " ");
+            String category = description.split(" ")[description.split(" ").length - 1];
+            privilegeUser.add(privilegeRepository.save(new Privilege(category, TypePrivilege.values()[i], description, TypeRole.USER)));
+        }
 
-        Role roleAdmin = new Role("Super Admin", TypeRole.AUTHENTICATION);
+        Role roleUser = new Role("USER", TypeRole.USER);
+        roleUser.setPrivileges(privilegeUser);
+        roleRepository.save(roleUser);
+
+
+        Role roleAdmin = new Role("Super Admin", TypeRole.SUPER_ADMIN);
         roleAdmin.setPrivileges(privilegeAdmin);
         roleAdmin = roleRepository.save(roleAdmin);
 
@@ -76,7 +92,42 @@ public class DataLoadConfig {
         profile.setUser(admin);
         profile.setUsername("lazare.kounasso@esmt.sn");
         profileRepository.save(profile);
+    }
 
+    private void loadDefaultTaskCategories() {
+        if (taskCategoryRepository.count() > 0) {
+            return;
+        }
+
+        List<TaskCategory> taskCategories = new ArrayList<>();
+
+        TaskCategory taskCategory1 = new TaskCategory();
+        taskCategory1.setDefaultTaskCategory(true);
+        taskCategory1.setName("Backlog");
+        taskCategory1.setIndexColor("#E9E9E9");
+        taskCategories.add(taskCategory1);
+
+        TaskCategory taskCategory2 = new TaskCategory();
+        taskCategory2.setDefaultTaskCategory(true);
+        taskCategory2.setName("In Progress");
+        taskCategory2.setIndexColor("#6A51FF");
+        taskCategories.add(taskCategory2);
+
+
+        TaskCategory taskCategory3 = new TaskCategory();
+        taskCategory3.setDefaultTaskCategory(true);
+        taskCategory3.setName("Review");
+        taskCategory3.setIndexColor("#E7492E");
+        taskCategories.add(taskCategory3);
+
+
+        TaskCategory taskCategory4 = new TaskCategory();
+        taskCategory4.setDefaultTaskCategory(true);
+        taskCategory4.setName("Completed");
+        taskCategory4.setIndexColor("#33AA44");
+        taskCategories.add(taskCategory4);
+
+        taskCategoryRepository.saveAll(taskCategories);
     }
 
 }

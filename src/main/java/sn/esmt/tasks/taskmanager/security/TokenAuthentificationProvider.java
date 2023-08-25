@@ -22,6 +22,8 @@ public class TokenAuthentificationProvider {
 
     @Value("${jwt.jwtExpirationInMs}")
     private long jwtExpirationInMs;
+    @Value("${jwt.jwtExpirationActivateAccountInMs}")
+    private long jwtExpirationActivateAccountInMs;
     @Value("${jwt.jwtRefreshExpirationInMs}")
     private long jwtRefreshExpirationInMs;
 
@@ -68,6 +70,15 @@ public class TokenAuthentificationProvider {
         return new JwtAuthenticationResponse(token, accessToken, expiryDate, tokenPermission);
     }
 
+    public String generateSimpleToken(UUID userId) {
+        return Jwts.builder()
+                .setSubject(userId.toString())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(new Date().getTime() + jwtExpirationActivateAccountInMs))
+                .signWith(SignatureAlgorithm.HS512, jwtSecret.getBytes())
+                .compact();
+    }
+
     public String getUserIdFromJWT(String token) {
         Claims claims = Jwts.parser()
                 .setSigningKey(jwtSecret.getBytes())
@@ -79,19 +90,6 @@ public class TokenAuthentificationProvider {
 
     public boolean validateToken(String authToken) {
         return validateJWT(authToken, jwtSecret);
-    }
-
-    public String getUserIdFromRefreshJWT(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(jwtRefreshSecret.getBytes())
-                .parseClaimsJws(token)
-                .getBody();
-
-        return claims.getSubject();
-    }
-
-    public boolean validateAccessToken(String authToken) {
-        return validateJWT(authToken, jwtRefreshSecret);
     }
 
     private boolean validateJWT(String authToken, String jwtRefreshSecret) {
