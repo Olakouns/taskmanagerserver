@@ -95,7 +95,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .setPropertyCondition(Conditions.isNotNull())
                 .setAmbiguityIgnored(true);
         return modelMapper;
-
     }
 
 

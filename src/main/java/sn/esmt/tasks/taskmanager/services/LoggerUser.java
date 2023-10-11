@@ -26,9 +26,7 @@ public class LoggerUser {
 
 
     public Profile getCurrentProfile() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (!auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) return null;
-        User user = userRepository.getReferenceById(((UserPrincipal) auth.getPrincipal()).getId());
+        User user = this.getCurrentUser();
         return profileRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("Profile", "current user", user.getId()));
     }
 
